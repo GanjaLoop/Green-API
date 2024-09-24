@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Тестовая страница GREEN-API</title>
+    <style>
+        /* Минимальные стили для компоновки колонок */
+        .container {
+            display: flex;
+        }
+        .left-column, .right-column {
+            width: 50%;
+            box-sizing: border-box;
+        }
+        .left-column {
+            padding-right: 40px;
+        }
+        .right-column {
+            padding-left: 40px;
+        }
+        /* Стили для элементов внутри колонок */
+        .left-column h1, .left-column h2, .left-column h3, .right-column h2 {
+            margin-top: 0;
+        }
+        .left-column div, .left-column label, .left-column input, .left-column button {
+            display: block;
+            width: 600px;
+            margin-bottom: 10px;
+
+        }
+        .left-column input {
+            padding: 10px;
+			width: 576px;
+        }
+        .left-column button {
+            padding: 20px;
+        }
+        /* Окно ответа */
+        #response {
+            width: 50%;
+            height: 80vh;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Левая колонка: поля ввода и кнопки -->
+    <div class="left-column">
+
+        <div>
+            <input type="text" id="idInstance" placeholder="Введите ID инстанса">
+        </div>
+        <div>
+            <input type="text" id="apiTokenInstance" placeholder="Введите API Token инстанса">
+        </div>
+
+
+        <!-- Кнопки методов без дополнительных полей -->
+        <div>
+            <button onclick="getSettings()">getSettings</button>
+            <button onclick="getStateInstance()">getStateInstance</button>
+        </div>
+
+        <!-- Блок для отправки сообщения -->
+        <div>
+            <input type="text" id="chatIdSendMessage" placeholder="Введите ID пользователя">
+            <input type="text" id="message" placeholder="Введите сообщение">
+            <button onclick="sendMessage()">sendMessage</button>
+        </div>
+
+        <!-- Блок для отправки файла по URL -->
+        <div>
+            <input type="text" id="chatIdSendFile" placeholder="Введите ID пользователя">
+            <input type="text" id="urlFile" placeholder="Введите URL файла">
+            <button onclick="sendFileByUrl()">sendFileByUrl</button>
+        </div>
+
+    </div>
+
+    <!-- Правая колонка: окно ответа -->
+    <div class="right-column">
+        <h2>Ответ:</h2>
+        <textarea id="response" readonly></textarea>
+    </div>
+
+</div>
+    <!-- Ваши скрипты -->
+    <script>
+        function getIdToken() {
+            const idInstance = document.getElementById('idInstance').value.trim();
+            const apiTokenInstance = document.getElementById('apiTokenInstance').value.trim();
+            if (!idInstance || !apiTokenInstance) {
+                alert('Пожалуйста, введите idInstance и apiTokenInstance.');
+                throw new Error('Отсутствуют необходимые параметры подключения.');
+            }
+            return { idInstance, apiTokenInstance };
+        }
+
+        function getSettings() {
+            const { idInstance, apiTokenInstance } = getIdToken();
+            fetch(`https://api.green-api.com/waInstance${idInstance}/getSettings/${apiTokenInstance}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('response').value = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    document.getElementById('response').value = error.toString();
+                });
+        }
+
+        function getStateInstance() {
+            const { idInstance, apiTokenInstance } = getIdToken();
+            fetch(`https://api.green-api.com/waInstance${idInstance}/getStateInstance/${apiTokenInstance}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('response').value = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    document.getElementById('response').value = error.toString();
+                });
+        }
+
+        function sendMessage() {
+            const { idInstance, apiTokenInstance } = getIdToken();
+            const chatId = document.getElementById('chatIdSendMessage').value.trim();
+            const message = document.getElementById('message').value.trim();
+
+            if (!chatId || !message) {
+                alert('Пожалуйста, введите ID пользователя и сообщение.');
+                return;
+            }
+
+            fetch(`https://api.green-api.com/waInstance${idInstance}/sendMessage/${apiTokenInstance}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chatId: chatId,
+                    message: message
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('response').value = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById('response').value = error.toString();
+            });
+        }
+
+        function sendFileByUrl() {
+            const { idInstance, apiTokenInstance } = getIdToken();
+            const chatId = document.getElementById('chatIdSendFile').value.trim();
+            const urlFile = document.getElementById('urlFile').value.trim();
+
+            if (!chatId || !urlFile) {
+                alert('Пожалуйста, введите ID пользователя и URL файла.');
+                return;
+            }
+
+            fetch(`https://api.green-api.com/waInstance${idInstance}/sendFileByUrl/${apiTokenInstance}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chatId: chatId,
+                    urlFile: urlFile
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('response').value = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById('response').value = error.toString();
+            });
+        }
+    </script>
+
+    </body>
+    </html>
